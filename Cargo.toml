@@ -1,0 +1,36 @@
+[package]
+name = "linux-fs-tagger"
+version = "0.1.0"
+authors = ["AlteredOxide <me@alteredoxide.com>"]
+description = """
+linux-fs-tagger is currently a very minimal (alpha) command-line tool for
+creating and managing tags for directories and files within any file system that
+supports extended attriubtes (xattrs).
+All major linux file systems offer support:
+- Ext4
+- Btrfs
+- ZFS
+- XFS
+This alpha offers very basic support for set, list, find, and remove.
+"""
+edition = "2021"
+
+[profile.release]
+opt-level = 3
+debug = false
+strip = "debuginfo"
+lto = true
+codegen-units = 1
+
+[[bin]]
+bench = false
+path = "src/main.rs"
+name = "tag"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.75"
+clap = { version = "4.4.0", features = ["derive"] }
+regex = "1.9.4"
+xattr = "1.0.1"
