@@ -1,6 +1,7 @@
 
 use clap::{Args, Parser, Subcommand};
 use regex::Regex;
+use walkdir::WalkDir;
 use xattr;
 
 
@@ -27,13 +28,13 @@ enum Commands {
     #[clap(name="find")]
     Find(CommandArgs),
 
-    #[clap(name="list")]
+    #[clap(name="ls")]
     List(CommandArgs),
 
     #[clap(name="set")]
     Set(CommandArgs),
 
-    #[clap(name="remove")]
+    #[clap(name="rm")]
     Remove(CommandArgs),
 }
 
@@ -78,12 +79,31 @@ fn set_tags(path: &str, tags: Vec<String>) -> anyhow::Result<()> {
 }
 
 
+/// Print all relative sub-paths, within the given path, that contain one or
+/// more specified tags. Under each path, the associated tags matching your
+/// search will be printed.
 fn find_tags(path: &str, tags: Vec<String>) -> anyhow::Result<()> {
-    if let Some(fs_tags_string) = get_tags_string(path)? {
-        let pattern = Regex::new(&tags.join("|"))?;
-        let matches = pattern.find_iter(&fs_tags_string);
-        for tag_match in matches {
-            println!("{}", tag_match.as_str());
+    for entry in WalkDir::new(path).into_iter().filter_map(Result::ok) {
+        let subpath = entry.path();
+        let subpath_opt = subpath.to_str();
+        if subpath_opt.is_none() {
+            continue
+        }
+        let subpath_str = subpath_opt.unwrap();
+        if let Some(fs_tags_string) = get_tags_string(subpath_str)? {
+            let pattern = Regex::new(&tags.join("|"))?;
+            let matching_tags: Vec<&str> = pattern
+                .find_iter(&fs_tags_string)
+                .into_iter()
+                .map(|m| m.as_str())
+                .collect();
+            if matching_tags.is_empty() {
+                continue
+            }
+            println!("{}", subpath_str);
+            for tag_match in matching_tags {
+                println!("  {}", tag_match);
+            }
         }
     }
     Ok(())

@@ -1,6 +1,6 @@
 [package]
 name = "linux-fs-tagger"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["AlteredOxide <me@alteredoxide.com>"]
 description = """
 linux-fs-tagger is currently a very minimal (alpha) command-line tool for
@@ -33,4 +33,5 @@ name = "tag"
 anyhow = "1.0.75"
 clap = { version = "4.4.0", features = ["derive"] }
 regex = "1.9.4"
+walkdir = "2.3.3"
 xattr = "1.0.1"
